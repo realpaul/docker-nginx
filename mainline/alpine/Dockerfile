@@ -47,6 +47,9 @@ ENV CONFIG "\
 	--with-file-aio \
 	--with-http_v2_module \
 	--with-ipv6 \
+	# Thirdparty Preparation
+	--add-module=/tmp/headers-more-nginx-module \
+	# Thirdparty Preparation End
 	"
 
 RUN \
@@ -66,6 +69,12 @@ RUN \
 		gd-dev \
 		geoip-dev \
 		perl-dev \
+		git \
+	# Thirdparty Preparation
+	&& cd /tmp \
+	&& git clone https://github.com/openresty/headers-more-nginx-module \
+	&& cd /tmp/headers-more-nginx-module \
+	# Thirdparty Preparation End
 	&& curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
 	&& curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
 	&& export GNUPGHOME="$(mktemp -d)" \
@@ -86,6 +95,9 @@ RUN \
 	&& ./configure $CONFIG \
 	&& make \
 	&& make install \
+	# Thirdparty Cleanup
+	&& rm -rf /tmp/headers-more-nginx-module \
+	# Thirdparty Cleanup End
 	&& rm -rf /etc/nginx/html/ \
 	&& mkdir /etc/nginx/conf.d/ \
 	&& mkdir -p /usr/share/nginx/html/ \
