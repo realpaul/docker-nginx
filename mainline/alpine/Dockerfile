@@ -2,7 +2,7 @@ FROM alpine:3.4
 
 MAINTAINER NGINX Docker Maintainers "docker-maint@nginx.com"
 
-ENV NGINX_VERSION 1.11.2
+ENV NGINX_VERSION 1.11.4
 
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& CONFIG="\
@@ -41,6 +41,8 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		--with-threads \
 		--with-stream \
 		--with-stream_ssl_module \
+		--with-stream_realip_module \
+		--with-stream_geoip_module=dynamic \
 		--with-http_slice_module \
 		--with-mail \
 		--with-mail_ssl_module \
@@ -84,14 +86,15 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& rm nginx.tar.gz \
 	&& cd /usr/src/nginx-$NGINX_VERSION \
 	&& ./configure $CONFIG --with-debug \
-	&& make \
+	&& make -j$(getconf _NPROCESSORS_ONLN) \
 	&& mv objs/nginx objs/nginx-debug \
 	&& mv objs/ngx_http_xslt_filter_module.so objs/ngx_http_xslt_filter_module-debug.so \
 	&& mv objs/ngx_http_image_filter_module.so objs/ngx_http_image_filter_module-debug.so \
 	&& mv objs/ngx_http_geoip_module.so objs/ngx_http_geoip_module-debug.so \
 	&& mv objs/ngx_http_perl_module.so objs/ngx_http_perl_module-debug.so \
+	&& mv objs/ngx_stream_geoip_module.so objs/ngx_stream_geoip_module-debug.so \
 	&& ./configure $CONFIG \
-	&& make \
+	&& make -j$(getconf _NPROCESSORS_ONLN) \
 	&& make install \
 	# Thirdparty Cleanup
 	&& rm -rf /tmp/headers-more-nginx-module \
@@ -106,6 +109,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& install -m755 objs/ngx_http_image_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_image_filter_module-debug.so \
 	&& install -m755 objs/ngx_http_geoip_module-debug.so /usr/lib/nginx/modules/ngx_http_geoip_module-debug.so \
 	&& install -m755 objs/ngx_http_perl_module-debug.so /usr/lib/nginx/modules/ngx_http_perl_module-debug.so \
+	&& install -m755 objs/ngx_stream_geoip_module-debug.so /usr/lib/nginx/modules/ngx_stream_geoip_module-debug.so \
 	&& ln -s ../../usr/lib/nginx/modules /etc/nginx/modules \
 	&& strip /usr/sbin/nginx* \
 	&& strip /usr/lib/nginx/modules/*.so \
@@ -128,7 +132,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& apk add --no-cache --virtual .nginx-rundeps $runDeps \
 	&& apk del .build-deps \
 	&& apk del .gettext \
-	&& mv /tmp/envsubst /usr/bin/ \
+	&& mv /tmp/envsubst /usr/local/bin/ \
 	\
 	# forward request and error logs to docker log collector
 	&& ln -sf /dev/stdout /var/log/nginx/access.log \

@@ -75,14 +75,14 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& rm nginx.tar.gz \
 	&& cd /usr/src/nginx-$NGINX_VERSION \
 	&& ./configure $CONFIG --with-debug \
-	&& make \
+	&& make -j$(getconf _NPROCESSORS_ONLN) \
 	&& mv objs/nginx objs/nginx-debug \
 	&& mv objs/ngx_http_xslt_filter_module.so objs/ngx_http_xslt_filter_module-debug.so \
 	&& mv objs/ngx_http_image_filter_module.so objs/ngx_http_image_filter_module-debug.so \
 	&& mv objs/ngx_http_geoip_module.so objs/ngx_http_geoip_module-debug.so \
 	&& mv objs/ngx_http_perl_module.so objs/ngx_http_perl_module-debug.so \
 	&& ./configure $CONFIG \
-	&& make \
+	&& make -j$(getconf _NPROCESSORS_ONLN) \
 	&& make install \
 	&& rm -rf /etc/nginx/html/ \
 	&& mkdir /etc/nginx/conf.d/ \
@@ -116,7 +116,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& apk add --no-cache --virtual .nginx-rundeps $runDeps \
 	&& apk del .build-deps \
 	&& apk del .gettext \
-	&& mv /tmp/envsubst /usr/bin/ \
+	&& mv /tmp/envsubst /usr/local/bin/ \
 	\
 	# forward request and error logs to docker log collector
 	&& ln -sf /dev/stdout /var/log/nginx/access.log \
