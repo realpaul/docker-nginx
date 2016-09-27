@@ -5,9 +5,6 @@ MAINTAINER NGINX Docker Maintainers "docker-maint@nginx.com"
 ENV NGINX_VERSION 1.11.4
 
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
-	# Thirdparty Preparation
-	&& NPS_VERSION=1.11.33.4 \
-	# Thirdparty Preparation End
 	&& CONFIG="\
 		--prefix=/etc/nginx \
 		--sbin-path=/usr/sbin/nginx \
@@ -52,10 +49,9 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		--with-file-aio \
 		--with-http_v2_module \
 		--with-ipv6 \
-		# Thirdparty Preparation
-		--add-module=/tmp/headers-more-nginx-module \
-		--add-module=/tmp/ngx_pagespeed-${NPS_VERSION}-beta \
-		# Thirdparty Preparation End
+	# Thirdparty Preparation
+	--add-module=/tmp/headers-more-nginx-module \
+	# Thirdparty Preparation End
 	" \
 	&& addgroup -S nginx \
 	&& adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
@@ -77,12 +73,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	# Thirdparty Preparation
 	&& cd /tmp \
 	&& git clone https://github.com/openresty/headers-more-nginx-module \
-	&& curl -fSL https://github.com/pagespeed/ngx_pagespeed/archive/v${NPS_VERSION}-beta.zip -o v${NPS_VERSION}-beta.zip \
-	&& unzip v${NPS_VERSION}-beta.zip \
-	&& cd /tmp/ngx_pagespeed-${NPS_VERSION}-beta \
-	&& curl -fSL https://dl.google.com/dl/page-speed/psol/${NPS_VERSION}.tar.gz -o ${NPS_VERSION}.tar.gz \
-	&& tar -xzvf ${NPS_VERSION}.tar.gz \
-	&& rm -rf ${NPS_VERSION}.tar.gz \
+	&& cd /tmp/headers-more-nginx-module \
 	# Thirdparty Preparation End
 	&& curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
 	&& curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
